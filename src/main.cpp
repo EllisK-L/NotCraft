@@ -11,6 +11,7 @@
 #include "include/Object.h"
 #include "include/Window.h"
 #include "include/Terrain.h"
+#include "include/Utils.h"
 
 double deltaTime = 0;
 int mousePos[2] = {0,0};
@@ -23,7 +24,9 @@ float playerMovementSpeed = 1.0f;
 auto startTime = std::chrono::system_clock::now();
 double fps = 0;
 
-Terrain* terrain = new Terrain();
+Utils::image grass;
+
+Terrain* terrain = new Terrain(grass);
 Window* window = new Window(1200,800,"Window 1");
 Camera* cam = new Camera(); 
 
@@ -69,6 +72,7 @@ void idle(void){
 
 	cam->moveZ( (movement[2][0] + movement[2][1]) * playerMovementSpeed * deltaTime);
 	cam->moveX( (movement[0][0] + movement[0][1]) * playerMovementSpeed * deltaTime);
+	cam->moveY((movement[1][0] + movement[1][1]) * playerMovementSpeed * deltaTime);
 
 	glutPostRedisplay();
 }
@@ -88,7 +92,7 @@ void initializeGL(void)
 	// enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
+	//glEnable(GL_TEXTURE_2D);
 	glEnable(GL_LINE_SMOOTH);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// set background color to be black
@@ -105,6 +109,8 @@ void initializeGL(void)
 
 void initializeClasses(){
 	terrain->create();
+	grass = *Utils::loadImage("resources/grass.ppm");
+
 }
 
 void resizeWindow(int width, int height){
@@ -125,6 +131,12 @@ void keyboardDown(unsigned char c, int x, int y){
 	case 'a':
 		movement[0][1] = -1;
 		break;
+	case 'e':
+		movement[1][0] = 1;
+		break;
+	case 'q':
+		movement[1][1] = -1;
+		break;
 	default:
 		break;
 	}
@@ -143,6 +155,12 @@ void keyboardUp(unsigned char c, int x, int y){
 		break;
 	case 'a':
 		movement[0][1] = 0;
+		break;
+	case 'e':
+		movement[1][0] = 0;
+		break;
+	case 'q':
+		movement[1][1] = 0;
 		break;
 	default:
 		break;

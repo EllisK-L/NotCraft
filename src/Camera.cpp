@@ -39,7 +39,7 @@ void Camera::moveX(GLfloat amount) {
 }
 
 void Camera::moveY(GLfloat amount) {
-	cameraPos[1] += amount;
+	cameraPos[1] += amount * 5;
 	calcCameraLookMouse(0, 0);
 }
 
