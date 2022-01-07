@@ -18,7 +18,7 @@ int mousePos[2] = {0,0};
 signed char movement[3][2] = {
 	{0,0},
 	{0,0},
-	{0,0}
+	{0,0}    
 };
 float playerMovementSpeed = 1.0f;
 auto startTime = std::chrono::system_clock::now();
@@ -37,10 +37,12 @@ std::chrono::duration<double> calculateFPS() {
 
 	std::chrono::duration<double> elapsedTime = endTime - startTime;
 	//limit the frame times to aprox 60 frames per second
-	//while (currentTimeInterval < (double).01666) {
-	//	newTime = clock();
-	//	currentTimeInterval = (double)(newTime - oldTime) / CLOCKS_PER_SEC;
-	//}
+	while (elapsedTime.count() < (double)0.016) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		//printf("%f\n", elapsedTime.count());
+		endTime = std::chrono::system_clock::now();
+		elapsedTime = endTime - startTime;
+	}
 	startTime = std::chrono::system_clock::now();
 	deltaTime = elapsedTime.count();
 	return elapsedTime;
@@ -66,9 +68,9 @@ void displayDraw(void){
 }
 
 void idle(void){
-	//std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	//printf("%f\n",1.0f/(calculateFPS().count()));
 	fps = 1.0f/(calculateFPS().count());
+	//std::this_thread::sleep_for(std::chrono::milliseconds(5));
+	printf("%f\n", fps);
 
 	cam->moveZ( (movement[2][0] + movement[2][1]) * playerMovementSpeed * deltaTime);
 	cam->moveX( (movement[0][0] + movement[0][1]) * playerMovementSpeed * deltaTime);
