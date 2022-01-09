@@ -9,7 +9,7 @@
                 "-g",
                 "*.cpp",
                 "-o",
-                "${fileDirname}/main",
+                "${fileDirname}/main.build",
                 "-lGL",
                 "-lGLU",
                 "-lglut",
