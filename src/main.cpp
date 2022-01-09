@@ -12,6 +12,7 @@
 #include "include/Window.h"
 #include "include/Terrain.h"
 #include "include/Utils.h"
+#include "include/Raycast.h"
 
 double deltaTime = 0;
 int mousePos[2] = {0,0};
@@ -29,6 +30,10 @@ Utils::image grass;
 Terrain* terrain = new Terrain(grass);
 Window* window = new Window(1200,800,"Window 1");
 Camera* cam = new Camera(); 
+//test ray
+Raycast* ray = new Raycast({0,0,0},{0,0,0});
+Utils::point3f raySphere = {0,0,0};
+GLUquadricObj *qobj = 0;
 
 std::chrono::duration<double> calculateFPS() {
 	//calculate the frame times
@@ -61,10 +66,19 @@ void displayDraw(void){
 		glVertex3f(-10,yPos,-10);
 	glEnd();
 
+	ray->render();
+	qobj = gluNewQuadric();
+
+	glColor3f(1,0,0);
+	glPushMatrix();
+	glTranslatef(ray->getRayEnd().x, ray->getRayEnd().y, ray->getRayEnd().z);
+	gluSphere(qobj, .1, 30, 30);
+	glPopMatrix();
+
 	terrain->render();
 
-	glFlush();
-	//glutSwapBuffers();
+	//glFlush();
+	glutSwapBuffers();
 }
 
 void idle(void){
@@ -76,14 +90,29 @@ void idle(void){
 	cam->moveX( (movement[0][0] + movement[0][1]) * playerMovementSpeed * deltaTime);
 	cam->moveY((movement[1][0] + movement[1][1]) * playerMovementSpeed * deltaTime);
 
+	//raycasting test
+	delete(ray);
+	ray = new Raycast(cam->getCameraPos(), cam->getLookTheta());
+	ray->cast(2);
+
 	glutPostRedisplay();
 }
 
 void idleMouseFunc(int x, int y) {
-	float offsetX = mousePos[0] - x;
-	float offsetY = mousePos[1] - y;
-	
-	//glutWarpPointer(windowWidth / 2, windowHeight / 2);
+	static bool warped = false;
+	float offsetX = window->getWidth() / 2 - x;
+	float offsetY = window->getHeight() / 2 - y;
+	if(offsetX == 0 && offsetY == 0){
+		warped = true;
+	}
+	else{
+		warped = false;
+	}
+	if(!warped){
+		glutWarpPointer(window->getWidth() / 2, window->getHeight() / 2);
+		glutSetCursor(GLUT_CURSOR_NONE);
+		warped = true;
+	}
 	mousePos[0] = x;
 	mousePos[1] = y;
 	cam->calcCameraLookMouse(offsetX, offsetY);
@@ -104,7 +133,7 @@ void initializeGL(void)
 	// load the identity matrix into the projection matrix
 	glLoadIdentity();
 	// gluPerspective(fovy, aspect, near, far)
-	gluPerspective(45, (float)*(window->getWidth()) / (float)*(window->getHeight()), 0.1, 200);
+	gluPerspective(45, (float)(window->getWidth()) / (float)(window->getHeight()), 0.1, 200);
 	// change into model-view mode so that we can change the object positions
 	glMatrixMode(GL_MODELVIEW);
 }
@@ -174,8 +203,8 @@ int main(int argc, char** argv)
 	//initialize the toolkit
 	glutInit(&argc, argv);
 	//set display mode
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
-	//glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	//glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	//set window size
 	window->initWindow();
 	//set window position on screen

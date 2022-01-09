@@ -1,5 +1,6 @@
 #pragma once
 #include <GL/glut.h>
+#include "Utils.h"
 #include "Object.h"
 
 class Camera : public Object {
@@ -19,13 +20,13 @@ public:
 
 	bool advancedCont = false;
 
-	GLfloat* getPos();
+	Utils::point3f getCurrentPos();
 
-
-	GLfloat* getCameraPos() { return cameraPos; };
-	GLfloat* getCameraLook() { return cameraLook; };
-	GLfloat* getCameraUp() { return cameraUp; };
-	GLfloat* getLookTheta() { return lookTheta; }
+	
+	Utils::point3f getCameraPos() { return cameraPos; };
+	Utils::rotation3f getCameraLook() { return cameraLook; };
+	Utils::point3f getCameraUp() { return cameraUp; };
+	Utils::rotation3f getLookTheta() { return lookTheta; }
 	
 	
 
@@ -33,11 +34,11 @@ public:
 private:
 	void calcCameraLookAt();
 
-	GLfloat cameraPos[3] = { 0,1,0 };
-	GLfloat cameraLook[3] = { 0,0,0 };
-	GLfloat cameraUp[3] = { 0,1,0 };
+	Utils::point3f cameraPos = { 0,1,0 };
+	Utils::rotation3f cameraLook = { 0,0,0 };
+	Utils::point3f cameraUp = { 0,1,0 };
 
-	GLfloat lookTheta[2] = { 0,0 };
+	Utils::rotation3f lookTheta = { 0,0,0 };
 
-	GLfloat sensitivity = .2f;
+	GLfloat sensitivity = .005f;
 };

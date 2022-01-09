@@ -41,12 +41,12 @@ public:
 	glMatrixMode(GL_MODELVIEW);
 }
 
-int* getWidth(){
-	return &width;
+int getWidth(){
+	return width;
 }
 
-int* getHeight(){
-	return &height;
+int getHeight(){
+	return height;
 }
 
 

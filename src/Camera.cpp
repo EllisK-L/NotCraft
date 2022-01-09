@@ -1,11 +1,8 @@
 #include <GL/glut.h>
 #include "include/Camera.h"
+#include "include/Utils.h"
 #include <stdio.h>
 #include <math.h>
-
-#define PI 3.14159265
-// conversion multiplier for converting from degrees to Radians
-#define DEG_TO_RAD PI/180.0
 
 Camera::Camera() {
 	printf("Camera Created!\n");
@@ -16,55 +13,60 @@ bool Camera::lookAt(GLfloat lookAtVector[3]) {
 }
 
 void Camera::calcCameraLookMouse(GLfloat xOffset, GLfloat yOffset) {
-	lookTheta[0] += xOffset * sensitivity * -1;
-	lookTheta[1] += yOffset * sensitivity;
+	lookTheta.x += xOffset * sensitivity * -1;
+	lookTheta.y += yOffset * sensitivity;
 
-	if (lookTheta[1] > 45) {
-		lookTheta[1] = 45;
+	if (lookTheta.y > 80) {
+		lookTheta.y = 80;
 	}
-	else if (lookTheta[1] < -45) {
-		lookTheta[1] = -45;
+	else if (lookTheta.y < -80) {
+		lookTheta.y = -80;
 	}
 
-	cameraLook[0] = cos(lookTheta[0] * DEG_TO_RAD) * cos(lookTheta[1] * DEG_TO_RAD) + cameraPos[0];
-	cameraLook[1] = sin(lookTheta[1] * DEG_TO_RAD) + cameraPos[1];
-	cameraLook[2] = sin(lookTheta[0] * DEG_TO_RAD) * cos(lookTheta[1] * DEG_TO_RAD) + cameraPos[2];
+	cameraLook.x = cos(lookTheta.x * DEG_TO_RAD) * cos(lookTheta.y * DEG_TO_RAD) + cameraPos.x;
+	cameraLook.y = sin(lookTheta.y * DEG_TO_RAD) + cameraPos.y;
+	cameraLook.z = sin(lookTheta.x * DEG_TO_RAD) * cos(lookTheta.y * DEG_TO_RAD) + cameraPos.z;
 }
 
 void Camera::moveX(GLfloat amount) {
-	cameraPos[0] += 10 * amount * cos((lookTheta[0] + 90) * DEG_TO_RAD);
-	//cameraPosition[1] +=  -10 * movement[2] * sin(mouseTheta[1] * DEG_TO_RAD);
-	cameraPos[2] += 10 * amount * sin((lookTheta[0] + 90) * DEG_TO_RAD);
+	cameraPos.x += 10 * amount * cos((lookTheta.x + 90) * DEG_TO_RAD);
+	//cameraPosition.y +=  -10 * movement.z * sin(mouseTheta.y * DEG_TO_RAD);
+	cameraPos.z += 10 * amount * sin((lookTheta.x + 90) * DEG_TO_RAD);
 	calcCameraLookMouse(0, 0);
 }
 
 void Camera::moveY(GLfloat amount) {
-	cameraPos[1] += amount * 5;
+	cameraPos.y += amount * 5;
 	calcCameraLookMouse(0, 0);
 }
 
 void Camera::moveZ(GLfloat amount) {
-	cameraPos[0] += 10 * amount * cos(lookTheta[0] * DEG_TO_RAD);
-	//cameraPosition[1] +=  -10 * movement[2] * sin(mouseTheta[1] * DEG_TO_RAD);
-	cameraPos[2] += 10 * amount * sin(lookTheta[0] * DEG_TO_RAD);
+	cameraPos.x += 10 * amount * cos(lookTheta.x * DEG_TO_RAD);
+	//cameraPos.y += 10 * amount * sin(lookTheta.y * DEG_TO_RAD);
+	cameraPos.z += 10 * amount * sin(lookTheta.x * DEG_TO_RAD);
 	calcCameraLookMouse(0, 0);
 }
 
 void Camera::update() {
-	cameraPos[1] -= .1;
-	if (cameraPos[1] < 1) {
-		cameraPos[1] = 1;
+	cameraPos.y -= .1;
+	if (cameraPos.y < 1) {
+		cameraPos.y = 1;
 	}
 }
 
 void Camera::render() {
-	gluLookAt(cameraPos[0], cameraPos[1], cameraPos[2],
-		cameraLook[0], cameraLook[1], cameraLook[2],
-		cameraUp[0], cameraUp[1], cameraUp[2]);
+	gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z,
+		cameraLook.x, cameraLook.y, cameraLook.z,
+		cameraUp.x, cameraUp.y, cameraUp.z);
 }
 
-GLfloat* Camera::getPos() {
-	return cameraPos;
+Utils::point3f Camera::getCurrentPos() {
+	Utils::point3f pos = {
+		cameraPos.x,
+		cameraPos.y,
+		cameraPos.z
+	};
+	return pos;
 }
 
 void Camera::calcCameraLookAt() {

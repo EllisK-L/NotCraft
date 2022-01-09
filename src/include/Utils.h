@@ -2,7 +2,11 @@
 #include <stdio.h>
 #include <GL/freeglut.h>
 #include <string>
+
 #define BLOCK_SIZE 1.0f
+#define PI 3.14159265
+// conversion multiplier for converting from degrees to Radians
+#define DEG_TO_RAD PI/180.0
 
 namespace Utils{
 
@@ -23,6 +27,12 @@ namespace Utils{
         int y;
         int z;
     };
+
+	struct rotation3f{
+		float x;
+		float y;
+		float z;
+	};
 
     //maybe make this a class later?
     struct image{
