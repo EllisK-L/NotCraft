@@ -20,14 +20,13 @@ public:
 
 	bool advancedCont = false;
 
-	Utils::point3f getCurrentPos();
+	Utils::point3f getCurrentPos() const;
 
 	
-	Utils::point3f getCameraPos() { return cameraPos; };
+	const Utils::point3f getCameraPos() { return cameraPos; };
 	Utils::rotation3f getCameraLook() { return cameraLook; };
 	Utils::point3f getCameraUp() { return cameraUp; };
 	Utils::rotation3f getLookTheta() { return lookTheta; }
-	
 	
 
 

@@ -1,9 +1,11 @@
 #pragma once
 #include "Utils.h"
+#include "Camera.h"
 
 #define CHUNK_WIDTH 16
-#define CHUNK_HEIGHT 8
-#define MAP_SIZE 8
+#define CHUNK_HEIGHT 4
+#define MAP_SIZE 100
+#define RENDER_DISTANCE 4
 
 enum BlockType{
     bType_grass
@@ -12,7 +14,7 @@ enum BlockType{
 class Terrain{
 
 public:
-    Terrain(Utils::image& img);
+    Terrain(Utils::image& img, const Camera& camera);
     void create();
     void render();
     struct Block{
@@ -26,8 +28,10 @@ private:
     void renderBlock(Block block, Utils::point3f point);
     void renderChunk(Chunk chunk, Utils::point2f offset);
     void initChunk(Chunk* chunk);
+    bool shouldChunkBeLoaded(Utils::point2f offset);
 
     Chunk chunks[MAP_SIZE][MAP_SIZE];
     Utils::image& texture;
+    const Camera& cam;
 
 };

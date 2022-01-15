@@ -60,7 +60,7 @@ void Camera::render() {
 		cameraUp.x, cameraUp.y, cameraUp.z);
 }
 
-Utils::point3f Camera::getCurrentPos() {
+Utils::point3f Camera::getCurrentPos() const {
 	Utils::point3f pos = {
 		cameraPos.x,
 		cameraPos.y,

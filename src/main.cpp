@@ -27,9 +27,10 @@ double fps = 0;
 
 Utils::image grass;
 
-Terrain* terrain = new Terrain(grass);
+
 Window* window = new Window(1200,800,"Window 1");
 Camera* cam = new Camera(); 
+Terrain* terrain = new Terrain(grass, *cam);
 //test ray
 Raycast* ray = new Raycast({0,0,0},{0,0,0});
 Utils::point3f raySphere = {0,0,0};

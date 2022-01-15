@@ -1,8 +1,10 @@
 #include "include/Terrain.h"
 #include "GL/freeglut.h"
+#include <math.h>
 
-Terrain::Terrain(Utils::image& img) : 
-    texture(img){
+Terrain::Terrain(Utils::image& img, const Camera& camera) : 
+    texture(img),
+    cam(camera){
     //creating each chunk (will do this dynamically later)
     for(int i = 0; i < MAP_SIZE; i++){
         for(int j = 0; j < MAP_SIZE; j++){
@@ -25,6 +27,15 @@ void Terrain::create(){
 
 }
 
+bool Terrain::shouldChunkBeLoaded(Utils::point2f offset){
+    bool ret = false;
+    if(pow(pow((offset.x + CHUNK_WIDTH / 2) - cam.getCurrentPos().x,2)+pow((offset.y + CHUNK_WIDTH / 2) - cam.getCurrentPos().z,2), .5) <= RENDER_DISTANCE * CHUNK_WIDTH){
+        ret  = true;
+    }
+    return ret;
+}
+
+
 void Terrain::render(){
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texture.textID);
@@ -36,7 +47,9 @@ void Terrain::render(){
         //drawing bottom
         for(int i = 0; i < MAP_SIZE; i++){
             for(int j=0; j < MAP_SIZE; j++){
-                renderChunk(chunks[i][j], Utils::point2f({(float)i * CHUNK_WIDTH, (float)j * CHUNK_WIDTH}));
+                Utils::point2f offset = {(float)i * CHUNK_WIDTH, (float)j * CHUNK_WIDTH};
+                if(shouldChunkBeLoaded(offset))
+                    renderChunk(chunks[i][j], offset);
             }
         }
         glEnd();
