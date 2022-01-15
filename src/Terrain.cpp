@@ -1,6 +1,7 @@
 #include "include/Terrain.h"
 #include "GL/freeglut.h"
 #include <math.h>
+#include <stdlib.h>
 
 Terrain::Terrain(Utils::image& img, const Camera& camera) : 
     texture(img),
@@ -8,7 +9,20 @@ Terrain::Terrain(Utils::image& img, const Camera& camera) :
     //creating each chunk (will do this dynamically later)
     for(int i = 0; i < MAP_SIZE; i++){
         for(int j = 0; j < MAP_SIZE; j++){
-            // initChunk(&chunks[i][j]);
+            for(int m = 0; m < CHUNK_HEIGHT; m++){
+                for(int n = 0; n < CHUNK_WIDTH; n++){
+                    for(int o = 0; o < CHUNK_WIDTH; o++){
+                        BlockType newBlock;
+                        if(m >= 4){
+                            newBlock = bType_air;
+                        }
+                        else{
+                            newBlock = bType_grass;
+                        }
+                        chunks[i][j].blocks[o][m][n].type = newBlock;
+                    }
+                }
+            }
         }
     }
 }
@@ -17,6 +31,13 @@ void Terrain::initChunk(Chunk* chunk){
     for(int i = 0; i < CHUNK_HEIGHT; i++){
         for(int j = 0; j < CHUNK_WIDTH; j++){
             for(int k = 0; k < CHUNK_WIDTH; k++){
+                BlockType newBlock;
+                if(i >= 4){
+                    newBlock = bType_air;
+                }
+                else{
+                    newBlock = bType_grass;
+                }
                 chunk->blocks[i][j][k] = Block{ bType_grass };
             }
         }
@@ -58,12 +79,14 @@ void Terrain::render(){
     glPopMatrix();
 }
 
-void Terrain::renderChunk(Chunk chunk, Utils::point2f offset){
+void Terrain::renderChunk(Chunk& chunk, Utils::point2f offset){
     for(int i = 0; i < CHUNK_HEIGHT; i++){
         for(int j = 0; j < CHUNK_WIDTH; j++){
             for(int k = 0; k < CHUNK_WIDTH; k++){
-                renderBlock(chunk.blocks[i][j][k], Utils::point3f({offset.x + k, (float)i, offset.y +j}));
-            }
+                if(chunk.blocks[k][i][j].type != bType_air){
+                    renderBlock(chunk.blocks[k][i][j], Utils::point3f({offset.x + k, (float)i, offset.y +j}));
+                }
+            } 
         }
     }
 }
