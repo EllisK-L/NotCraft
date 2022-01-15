@@ -34,6 +34,11 @@ namespace Utils{
 		float z;
 	};
 
+	struct point2f{
+        float x;
+        float y;
+    };
+
     //maybe make this a class later?
     struct image{
         int width;

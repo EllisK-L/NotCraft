@@ -55,7 +55,7 @@ std::chrono::duration<double> calculateFPS() {
 
 void displayDraw(void){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
+	glLoadIdentity(); 
 	cam->render();
 	glColor3f(1,1,1);
 	int yPos = -1;
