@@ -2,6 +2,7 @@
 #include "GL/freeglut.h"
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 Terrain::Terrain(Utils::image& img, const Camera& camera) : 
     texture(img),
@@ -89,6 +90,28 @@ void Terrain::renderChunk(Chunk& chunk, Utils::point2f offset){
             } 
         }
     }
+}
+
+
+Block& Terrain::getBlockAt(Utils::point3f position){
+    int chunkX = (int)round(position.x) / CHUNK_WIDTH;
+    int chunkZ = (int)round(position.z) / CHUNK_WIDTH;
+    printf("in chunk: %d, %d\n", chunkX, chunkZ);
+    if(chunkX < 0 || chunkZ < 0){
+        printf("OUT OF BOUNDS\n");
+        
+        //give a garbage block
+        Chunk& chunk = chunks[0][0];
+        return chunk.blocks[0][0][0];
+    }
+    else{
+        Chunk& chunk = chunks[chunkZ][chunkX];
+        return chunk.blocks[(int)round(position.x)][(int)round(position.y)][(int)round(position.z)];
+    }
+}
+
+Block& Terrain::getAdjBlock(Utils::point3f position, Directon dir){
+
 }
 
 void Terrain::renderBlock(Block block, Utils::point3f point){
@@ -229,10 +252,7 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y - BLOCK_SIZE/2, 
         point.z - BLOCK_SIZE/2);
-    
-
-
-
 
     //terrain[i][j][k] = {0,0,0};
 }
+

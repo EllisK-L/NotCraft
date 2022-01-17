@@ -11,16 +11,28 @@ enum BlockType{
     bType_grass,
     bType_air
 };
+enum Directon{
+    dir_right,
+    dir_left,
+    dir_up,
+    dir_down
+};
+
+struct Block{
+    BlockType type;
+};
 
 class Terrain{
 
 public:
+
     Terrain(Utils::image& img, const Camera& camera);
     void create();
     void render();
-    struct Block{
-        BlockType type;
-    };
+    
+    Block& getBlockAt(Utils::point3f position);
+    Block& getAdjBlock(Utils::point3f position, Directon dir);
+
 private:
     struct Chunk{
         Block blocks[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
