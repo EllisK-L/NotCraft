@@ -105,8 +105,8 @@ Block& Terrain::getBlockAt(Utils::point3f position){
         return chunk.blocks[0][0][0];
     }
     else{
-        Chunk& chunk = chunks[chunkZ][chunkX];
-        return chunk.blocks[(int)round(position.x)][(int)round(position.y)][(int)round(position.z)];
+        Chunk& chunk = chunks[chunkX][chunkZ];
+        return chunk.blocks[(int)round(position.x) % CHUNK_WIDTH][(int)round(position.y)][(int)round(position.z) % CHUNK_WIDTH];
     }
 }
 
