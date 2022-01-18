@@ -3,9 +3,9 @@
 #include "Camera.h"
 
 #define CHUNK_WIDTH 16
-#define CHUNK_HEIGHT 8
+#define CHUNK_HEIGHT 64
 #define MAP_SIZE 100
-#define RENDER_DISTANCE 4
+#define RENDER_DISTANCE 16
 
 enum BlockType{
     bType_grass,
@@ -31,7 +31,6 @@ public:
     void render();
     
     Block& getBlockAt(Utils::point3f position);
-    Block& getAdjBlock(Utils::point3f position, Directon dir);
 
 private:
     struct Chunk{
@@ -46,5 +45,4 @@ private:
     Chunk chunks[MAP_SIZE][MAP_SIZE];
     Utils::image& texture;
     const Camera& cam;
-
 };

@@ -96,22 +96,22 @@ void Terrain::renderChunk(Chunk& chunk, Utils::point2f offset){
 Block& Terrain::getBlockAt(Utils::point3f position){
     int chunkX = (int)round(position.x) / CHUNK_WIDTH;
     int chunkZ = (int)round(position.z) / CHUNK_WIDTH;
-    printf("in chunk: %d, %d\n", chunkX, chunkZ);
+    //printf("in chunk: %d, %d\n", chunkX, chunkZ);
     if(chunkX < 0 || chunkZ < 0){
         printf("OUT OF BOUNDS\n");
         
         //give a garbage block
         Chunk& chunk = chunks[0][0];
         return chunk.blocks[0][0][0];
+
+        
+        
+        
     }
     else{
         Chunk& chunk = chunks[chunkX][chunkZ];
         return chunk.blocks[(int)round(position.x) % CHUNK_WIDTH][(int)round(position.y)][(int)round(position.z) % CHUNK_WIDTH];
     }
-}
-
-Block& Terrain::getAdjBlock(Utils::point3f position, Directon dir){
-
 }
 
 void Terrain::renderBlock(Block block, Utils::point3f point){
@@ -120,32 +120,33 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     glColor3f(1,1,1);
     //drawing each
     //Need to improve, this is just a sanity check to make sure it's all working
+
     //top
-    //glTexCoord2i(200,201);
-    glTexCoord2f(1- 200.0f/texture.width,1 -201.0f/texture.height);
-    glVertex3f(point.x + BLOCK_SIZE/2, 
-        point.y + BLOCK_SIZE/2, 
-        point.z + BLOCK_SIZE/2);
+    if(getBlockAt(Utils::point3f({point.x, point.y + 1, point.z})).type == bType_air){
+        glTexCoord2f(1- 200.0f/texture.width,1 -201.0f/texture.height);
+        glVertex3f(point.x + BLOCK_SIZE/2, 
+            point.y + BLOCK_SIZE/2, 
+            point.z + BLOCK_SIZE/2);
 
-    glTexCoord2f(1- 200.0f/texture.width,1-399.0f/texture.height);
-    glVertex3f(point.x + BLOCK_SIZE/2, 
-        point.y + BLOCK_SIZE/2, 
-        point.z - BLOCK_SIZE/2);
+        glTexCoord2f(1- 200.0f/texture.width,1-399.0f/texture.height);
+        glVertex3f(point.x + BLOCK_SIZE/2, 
+            point.y + BLOCK_SIZE/2, 
+            point.z - BLOCK_SIZE/2);
 
-    glTexCoord2f(1-398.0f/texture.width,1-399.0f/texture.height);
-    glVertex3f(point.x - BLOCK_SIZE/2, 
-        point.y + BLOCK_SIZE/2, 
-        point.z - BLOCK_SIZE/2);
+        glTexCoord2f(1-398.0f/texture.width,1-399.0f/texture.height);
+        glVertex3f(point.x - BLOCK_SIZE/2, 
+            point.y + BLOCK_SIZE/2, 
+            point.z - BLOCK_SIZE/2);
 
-    glTexCoord2f(1-398.0f/texture.width,1-201.0f/texture.height);
-    glVertex3f(point.x - BLOCK_SIZE/2, 
-        point.y + BLOCK_SIZE/2, 
-        point.z + BLOCK_SIZE/2);
+        glTexCoord2f(1-398.0f/texture.width,1-201.0f/texture.height);
+        glVertex3f(point.x - BLOCK_SIZE/2, 
+            point.y + BLOCK_SIZE/2, 
+            point.z + BLOCK_SIZE/2);
+    }
     
 
-
-
     //bottom
+    if(getBlockAt(Utils::point3f({point.x, point.y - 1, point.z})).type == bType_air){
     glTexCoord2f(1-800.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y - BLOCK_SIZE/2, 
@@ -165,9 +166,10 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y - BLOCK_SIZE/2, 
         point.z - BLOCK_SIZE/2);
-
+    }
 
     //right
+    if(getBlockAt(Utils::point3f({point.x + 1, point.y, point.z})).type == bType_air){
     glTexCoord2f(1-398.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -187,8 +189,10 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y - BLOCK_SIZE/2, 
         point.z + BLOCK_SIZE/2);
+    }
 
     //left
+    if(getBlockAt(Utils::point3f({point.x - 1, point.y, point.z})).type == bType_air){
     glTexCoord2f(1-200.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x - BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -209,9 +213,10 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
         point.y + BLOCK_SIZE/2, 
         point.z - BLOCK_SIZE/2);
     
-
+    }
 
     //front
+    if(getBlockAt(Utils::point3f({point.x, point.y, point.z + 1})).type == bType_air){
     glTexCoord2f(1-201.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -231,8 +236,10 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y - BLOCK_SIZE/2, 
         point.z + BLOCK_SIZE/2);
+    }
 
     //back
+    if(getBlockAt(Utils::point3f({point.x, point.y, point.z - 1})).type == bType_air){
     glTexCoord2f(1-397.0f/texture.width, 1-398.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -252,7 +259,7 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y - BLOCK_SIZE/2, 
         point.z - BLOCK_SIZE/2);
-
+    }
     //terrain[i][j][k] = {0,0,0};
 }
 
