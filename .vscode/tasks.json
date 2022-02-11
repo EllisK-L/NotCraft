@@ -14,6 +14,7 @@
                 "-lGLU",
                 "-lglut",
                 "-Idir",
+                "-lGLEW"
                 // "${workspaceFolder}/**"
             ],
             "options": {

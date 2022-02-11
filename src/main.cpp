@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <GL/glew.h>
 #include <GL/glut.h>
 #include <math.h>
 #include <string.h>
@@ -21,6 +22,8 @@ signed char movement[3][2] = {
 	{0,0},
 	{0,0}    
 };
+
+
 float playerMovementSpeed = 1.0f;
 auto startTime = std::chrono::system_clock::now();
 double fps = 0;
@@ -58,6 +61,7 @@ void displayDraw(void){
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity(); 
 	cam->render();
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glColor3f(1,1,1);
 	int yPos = -1;
 	glBegin(GL_QUADS);
@@ -126,6 +130,13 @@ void idleMouseFunc(int x, int y) {
 
 void initializeGL(void)
 {
+	GLenum err = glewInit();
+if (GLEW_OK != err)
+{
+  /* Problem: glewInit failed, something is seriously wrong. */
+  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+}
+fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 	// enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -147,6 +158,18 @@ void initializeGL(void)
 void initializeClasses(){
 	terrain->create();
 	grass = *Utils::loadImage("resources/grass.ppm");
+
+	float positions[9] = {
+	0,0,0,
+	-1,-1,-1,
+	1,-1,1
+	};
+	unsigned int buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), positions, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
 }
 
