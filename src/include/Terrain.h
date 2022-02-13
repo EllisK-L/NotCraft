@@ -5,7 +5,7 @@
 #define CHUNK_WIDTH 16
 #define CHUNK_HEIGHT 64
 #define MAP_SIZE 100
-#define RENDER_DISTANCE 16
+#define RENDER_DISTANCE 4
 
 enum BlockType{
     bType_grass,

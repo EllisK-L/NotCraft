@@ -159,17 +159,21 @@ void initializeClasses(){
 	terrain->create();
 	grass = *Utils::loadImage("resources/grass.ppm");
 
-	float positions[9] = {
-	0,0,0,
-	-1,-1,-1,
-	1,-1,1
+	float positions[15] = {
+	0,10,2,  1,1,
+	-10,5,2, 1,0,
+	10,5,2,  0,0,
 	};
+
+
+
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 9*sizeof(float), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 15*sizeof(float), positions, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	// glVertexAttribPointer(3,2, GLfloat, GL_FALSE, sizeof(float) * 2, (void*)3*sizeof(float));
 
 }
 
