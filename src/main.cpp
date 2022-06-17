@@ -15,6 +15,26 @@
 #include "include/Utils.h"
 #include "include/Raycast.h"
 
+// Vertex Shader source code
+// const char* vertexShaderSource = "#version 330 core\n"
+// "layout (location = 0) in vec3 aPos;\n"
+// "void main()\n"
+// "{\n"
+// "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+// "}\0";
+// //Fragment Shader source code
+// const char* fragmentShaderSource = "#version 330 core\n"
+// "out vec4 FragColor;\n"
+// "void main()\n"
+// "{\n"
+// "   FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f);\n"
+// "}\n\0";
+// shader things
+// GLuint shaderProgram;
+
+GLuint VAO, VBO;
+GLuint VAO2, VBO2;
+
 double deltaTime = 0;
 int mousePos[2] = {0,0};
 signed char movement[3][2] = {
@@ -58,10 +78,10 @@ std::chrono::duration<double> calculateFPS() {
 }
 
 void displayDraw(void){
+	// glUseProgram(shaderProgram);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity(); 
 	cam->render();
-	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glColor3f(1,1,1);
 	int yPos = -1;
 	glBegin(GL_QUADS);
@@ -70,6 +90,16 @@ void displayDraw(void){
 		glVertex3f(10,yPos,-10);
 		glVertex3f(-10,yPos,-10);
 	glEnd();
+
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	glPushMatrix();
+	glTranslated(1,0,0);
+		glBindVertexArray(VAO2);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
+	glPopMatrix();
 
 	ray->render();
 	qobj = gluNewQuadric();
@@ -153,6 +183,65 @@ fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 	gluPerspective(45, (float)(window->getWidth()) / (float)(window->getHeight()), 0.1, 200);
 	// change into model-view mode so that we can change the object positions
 	glMatrixMode(GL_MODELVIEW);
+
+	// // enabling shaders
+	// GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	// glCompileShader(vertexShader);
+
+	// GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	// glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	// glCompileShader(fragmentShader);
+
+	// // shader program
+	// shaderProgram = glCreateProgram();
+	// glAttachShader(shaderProgram, vertexShader);
+	// glAttachShader(shaderProgram, fragmentShader);
+	// glLinkProgram(shaderProgram);
+	// glDeleteShader(vertexShader);
+	// glDeleteShader(fragmentShader);
+
+	float positions[15] = {
+	0,10,2,  1,1,
+	-10,5,2, 1,0,
+	10,5,2,  0,0,
+	};
+
+	// buffer tests
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+
+	float positions2[15] = {
+	0,5,2,  1,1,
+	-10,5,2, 1,0,
+	10,5,2,  0,0,
+	};
+
+	// buffer tests 2
+	glGenVertexArrays(1, &VAO2);
+	glGenBuffers(1, &VBO2);
+
+	glBindVertexArray(VAO2);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(positions2), positions2, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
 }
 
 void initializeClasses(){
@@ -167,13 +256,13 @@ void initializeClasses(){
 
 
 
-	unsigned int buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 15*sizeof(float), positions, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-	// glVertexAttribPointer(3,2, GLfloat, GL_FALSE, sizeof(float) * 2, (void*)3*sizeof(float));
+	// GLuint buffer;
+	// glGenBuffers(1, &buffer);
+	// glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	// glBufferData(GL_ARRAY_BUFFER, 15*sizeof(float), positions, GL_STATIC_DRAW);
+	// glEnableVertexAttribArray(0);
+	// glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	// // glVertexAttribPointer(3,2, GLfloat, GL_FALSE, sizeof(float) * 2, (void*)3*sizeof(float));
 
 }
 
