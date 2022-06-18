@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 
 Terrain::Terrain(Utils::image& img, const Camera& camera) : 
     texture(img),
@@ -28,6 +29,7 @@ Terrain::Terrain(Utils::image& img, const Camera& camera) :
     }
 }
 
+// Not used
 void Terrain::initChunk(Chunk* chunk){
     for(int i = 0; i < CHUNK_HEIGHT; i++){
         for(int j = 0; j < CHUNK_WIDTH; j++){
@@ -69,7 +71,7 @@ void Terrain::render(){
         //drawing bottom
         for(int i = 0; i < MAP_SIZE; i++){
             for(int j=0; j < MAP_SIZE; j++){
-                Utils::point2f offset = {(float)i * CHUNK_WIDTH, (float)j * CHUNK_WIDTH};
+                Utils::point2f offset = {(float)i * CHUNK_WIDTH, (float)j * CHUNK_WIDTH}; // <- why float?
                 if(shouldChunkBeLoaded(offset))
                     renderChunk(chunks[i][j], offset);
             }
@@ -94,23 +96,36 @@ void Terrain::renderChunk(Chunk& chunk, Utils::point2f offset){
 
 
 Block& Terrain::getBlockAt(Utils::point3f position){
-    int chunkX = (int)round(position.x) / CHUNK_WIDTH;
-    int chunkZ = (int)round(position.z) / CHUNK_WIDTH;
+    int chunkX = floor(position.x / CHUNK_WIDTH);
+    int chunkZ = floor(position.z / CHUNK_WIDTH);
     //printf("in chunk: %d, %d\n", chunkX, chunkZ);
-    if(chunkX < 0 || chunkZ < 0){
-        printf("OUT OF BOUNDS\n");
-        
-        //give a garbage block
+    if(chunkX < 0 || chunkZ < 0 || position.y < 0){
         Chunk& chunk = chunks[0][0];
-        return chunk.blocks[0][0][0];
+        return NULLBLOCK;
 
-        
-        
-        
     }
     else{
+        if(position.x < 0 || position.y < 0 || position.z < 0){
+            printf("ERROR! somehow got a broken position in getBlockAt()\n");
+        }
         Chunk& chunk = chunks[chunkX][chunkZ];
         return chunk.blocks[(int)round(position.x) % CHUNK_WIDTH][(int)round(position.y)][(int)round(position.z) % CHUNK_WIDTH];
+    }
+}
+
+void Terrain::generateVBO(Chunk& chunk){
+    // should probably change this size to everything that isn't air to keep memory low
+    Utils::point3f vertecies[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH];
+
+     for(int i = 0; i < CHUNK_HEIGHT; i++){
+        for(int j = 0; j < CHUNK_WIDTH; j++){
+            for(int k = 0; k < CHUNK_WIDTH; k++){
+                if(chunk.blocks[k][i][j].type != bType_air){
+                    // vertecies[]
+                    // renderBlock(chunk.blocks[k][i][j], Utils::point3f({offset.x + k, (float)i, offset.y +j}));
+                }
+            } 
+        }
     }
 }
 
@@ -146,7 +161,8 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     
 
     //bottom
-    if(getBlockAt(Utils::point3f({point.x, point.y - 1, point.z})).type == bType_air){
+    Block blockBottom = getBlockAt(Utils::point3f({point.x, point.y - 1, point.z}));
+    if(blockBottom.type == bType_air || blockBottom.type == bType_null){
     glTexCoord2f(1-800.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y - BLOCK_SIZE/2, 
@@ -169,7 +185,8 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     }
 
     //right
-    if(getBlockAt(Utils::point3f({point.x + 1, point.y, point.z})).type == bType_air){
+    Block blockRight = getBlockAt(Utils::point3f({point.x + 1, point.y, point.z}));
+    if(blockRight.type == bType_air || blockRight.type == bType_null){
     glTexCoord2f(1-398.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -192,7 +209,8 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     }
 
     //left
-    if(getBlockAt(Utils::point3f({point.x - 1, point.y, point.z})).type == bType_air){
+    Block blockLeft = getBlockAt(Utils::point3f({point.x - 1, point.y, point.z}));
+    if(blockLeft.type == bType_air || blockLeft.type == bType_null){
     glTexCoord2f(1-200.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x - BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -216,7 +234,8 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     }
 
     //front
-    if(getBlockAt(Utils::point3f({point.x, point.y, point.z + 1})).type == bType_air){
+    Block blockFront = getBlockAt(Utils::point3f({point.x, point.y, point.z + 1}));
+    if(blockFront.type == bType_air || blockFront.type == bType_null){
     glTexCoord2f(1-201.0f/texture.width, 1-201.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -239,7 +258,8 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     }
 
     //back
-    if(getBlockAt(Utils::point3f({point.x, point.y, point.z - 1})).type == bType_air){
+    Block blockBack = getBlockAt(Utils::point3f({point.x, point.y, point.z - 1}));
+    if(blockBack.type == bType_air || blockBack.type == bType_null){
     glTexCoord2f(1-397.0f/texture.width, 1-398.0f/texture.height);
     glVertex3f(point.x + BLOCK_SIZE/2, 
         point.y + BLOCK_SIZE/2, 
@@ -262,4 +282,6 @@ void Terrain::renderBlock(Block block, Utils::point3f point){
     }
     //terrain[i][j][k] = {0,0,0};
 }
+
+
 

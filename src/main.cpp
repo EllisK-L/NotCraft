@@ -128,11 +128,13 @@ void idle(void){
 	//raycasting test
 	delete(ray);
 	ray = new Raycast(cam->getCameraPos(), cam->getLookTheta());
-	ray->cast(4);
+	// ray->cast(4);
 	//printf("ray Z: %f\n", ray->getRayEnd().z);
 	//printf("ray X: %f\n", ray->getRayEnd().x);
-	Block& block = terrain->getBlockAt(ray->getRayEnd());
-	block.type = bType_air;
+	// Block& block = terrain->getBlockAt(ray->getRayEnd());
+	// if(block.type != bType_null){
+		// block.type = bType_air;
+	// }
 	//printf("Block: %d\n", .type);
 
 	glutPostRedisplay();
@@ -241,6 +243,7 @@ fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
 
 }
 
