@@ -4,7 +4,7 @@
 
 #define CHUNK_WIDTH 16
 #define CHUNK_HEIGHT 64
-#define MAP_SIZE 20
+#define MAP_SIZE 2
 #define RENDER_DISTANCE 4
 
 enum BlockType{
@@ -31,7 +31,7 @@ public:
     void create();
     void render();
     
-    Block& getBlockAt(Utils::point3f position);
+    Block& getBlockAt(Utils::point3f position, bool debug);
 
 
 private:
@@ -44,7 +44,8 @@ private:
     void renderChunk(Chunk& chunk, Utils::point2f offset);
     void initChunk(Chunk* chunk);
     bool shouldChunkBeLoaded(Utils::point2f offset);
-    void generateVBO(Chunk& chunk);
+    void generateVBO(Chunk& chunk, Utils::point2f offset);
+    float* getBlockVerts(const Block& block, Utils::point3f bOffset,Utils::point2f cOffset);
 
     Chunk chunks[MAP_SIZE][MAP_SIZE];
     Utils::image& texture;

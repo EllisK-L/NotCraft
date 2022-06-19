@@ -119,7 +119,9 @@ void displayDraw(void){
 void idle(void){
 	fps = 1.0f/(calculateFPS().count());
 	//std::this_thread::sleep_for(std::chrono::milliseconds(5));
+	/*
 	printf("%f\n", fps);
+	*/
 
 	cam->moveZ( (movement[2][0] + movement[2][1]) * playerMovementSpeed * deltaTime);
 	cam->moveX( (movement[0][0] + movement[0][1]) * playerMovementSpeed * deltaTime);
@@ -128,14 +130,14 @@ void idle(void){
 	//raycasting test
 	delete(ray);
 	ray = new Raycast(cam->getCameraPos(), cam->getLookTheta());
-	// ray->cast(4);
-	//printf("ray Z: %f\n", ray->getRayEnd().z);
-	//printf("ray X: %f\n", ray->getRayEnd().x);
-	// Block& block = terrain->getBlockAt(ray->getRayEnd());
-	// if(block.type != bType_null){
-		// block.type = bType_air;
-	// }
-	//printf("Block: %d\n", .type);
+	ray->cast(4);
+	// printf("ray Z: %f\n", ray->getRayEnd().z);
+	// printf("ray X: %f\n", ray->getRayEnd().x);
+	Block& block = terrain->getBlockAt(ray->getRayEnd(), true);
+	if(block.type != bType_null){
+		block.type = bType_air;	
+	}
+		printf("Block: %d\n", block.type);
 
 	glutPostRedisplay();
 }
