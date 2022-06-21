@@ -1,9 +1,11 @@
-#include "include/Terrain.h"
+#include <GL/glew.h>
 #include "GL/freeglut.h"
+#include "include/Terrain.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+
 
 Terrain::Terrain(Utils::image& img, const Camera& camera) : 
     texture(img),
@@ -28,16 +30,6 @@ Terrain::Terrain(Utils::image& img, const Camera& camera) :
         }
     }
 
-    for(int i = 0; i < MAP_SIZE; i++){
-        for(int j = 0; j < MAP_SIZE; j++){
-            printf("Generating VBO: i: %d, j: %d\n",i,j);
-            generateVBO(chunks[i][j], Utils::point2f{(float)i,(float)j});
-            printf("Done Generating VBO\n");
-        }
-    }
-
-
-
 }
 
 // Not used
@@ -59,7 +51,13 @@ void Terrain::initChunk(Chunk* chunk){
 }
 
 void Terrain::create(){
-
+    for(int i = 0; i < MAP_SIZE; i++){
+        for(int j = 0; j < MAP_SIZE; j++){
+            printf("Generating VBO: i: %d, j: %d\n",i,j);
+            generateVBO(&chunks[i][j], Utils::point2f{(float)i,(float)j});
+            printf("Done Generating VBO\n");
+        }
+    }
 }
 
 bool Terrain::shouldChunkBeLoaded(Utils::point2f offset){
@@ -72,23 +70,28 @@ bool Terrain::shouldChunkBeLoaded(Utils::point2f offset){
 
 
 void Terrain::render(){
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture.textID);
+    // glEnable(GL_TEXTURE_2D);
+    // glBindTexture(GL_TEXTURE_2D, texture.textID);
     glPushMatrix();
 
         //drawing a cube for at each point
-        glBegin(GL_QUADS);
+        // glBegin(GL_QUADS);
         glPointSize(2);
         //drawing bottom
         for(int i = 0; i < MAP_SIZE; i++){
             for(int j=0; j < MAP_SIZE; j++){
                 Utils::point2f offset = {(float)i * CHUNK_WIDTH, (float)j * CHUNK_WIDTH}; // <- why float?
                 if(shouldChunkBeLoaded(offset))
-                    renderChunk(chunks[i][j], offset);
+                    // renderChunk(chunks[i][j], offset);
+                    glPushMatrix();
+                    glTranslatef(offset.x, 0, offset.y);
+                    glBindVertexArray(chunks[i][j].VAO);
+                    glDrawArrays(GL_QUADS, 0, 98304);
+                    glPopMatrix();
             }
         }
-        glEnd();
-        glDisable(GL_TEXTURE_2D);
+        // glEnd();
+        // glDisable(GL_TEXTURE_2D);
 
     glPopMatrix();
 }
@@ -128,30 +131,53 @@ Block& Terrain::getBlockAt(Utils::point3f position, bool debug=false){
     }
 }
 
-void Terrain::generateVBO(Chunk& chunk, Utils::point2f offset){
+void Terrain::generateVBO(Chunk* chunk, Utils::point2f offset){
     // should probably change this size to everything that isn't air to keep memory low
-    // float vertecies[CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_HEIGHT * 720];
-    float* vertecies = (float*)malloc(sizeof(float) * CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_HEIGHT * 72);
+    // float vertecies[CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_HEIGHT * 720];]
+    size_t vert_size = sizeof(float) * CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_HEIGHT * 72;
+    float vertecies[CHUNK_WIDTH * CHUNK_WIDTH * CHUNK_HEIGHT * 72];
 
     int blockCounter = 0;
      for(int i = 0; i < CHUNK_HEIGHT; i++){
         for(int j = 0; j < CHUNK_WIDTH; j++){
             for(int k = 0; k < CHUNK_WIDTH; k++){
-                Block block = chunk.blocks[k][i][j];
+                Block block = chunk->blocks[k][i][j];
                 if(block.type != bType_air){
-                    getBlockVerts(block, Utils::point3f({(float)k,(float)i,(float)j}), offset);
+                    getBlockVerts(block, Utils::point3f({(float)k,(float)i,(float)j}), offset, &vertecies[blockCounter * 72]);
                     // vertecies[]
                     // renderBlock(chunk.blocks[k][i][j], Utils::point3f({offset.x + k, (float)i, offset.y +j}));
-                    
                     blockCounter ++;
                 }
             } 
         }
     }
+
+    float positions2[15] = {
+        0,5,2,  1,1,
+        -10,5,2, 1,0,
+        10,5,2,  0,0,
+	};
+
+    glGenVertexArrays(1,&(chunk->VAO));
+    glGenBuffers(1, &(chunk->VBO));
+
+    glBindVertexArray(chunk->VAO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->VBO);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(positions2), positions2, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vert_size, vertecies, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // glGenBuffers
 }
 
-    float* Terrain::getBlockVerts(const Block& block, Utils::point3f bOffset,Utils::point2f cOffset){
-        float* arr = (float*)malloc(72 * sizeof(float));
+    float* Terrain::getBlockVerts(const Block& block, Utils::point3f bOffset,Utils::point2f cOffset, float* arr){
+        // float* arr = (float*)malloc(72 * sizeof(float));
 
 //top
     if(getBlockAt(Utils::point3f({bOffset.x + (cOffset.x * CHUNK_WIDTH), bOffset.y + 1, bOffset.z + (cOffset.y * CHUNK_WIDTH)})).type == bType_air){
@@ -201,29 +227,29 @@ void Terrain::generateVBO(Chunk& chunk, Utils::point2f offset){
         arr[23] =bOffset.z - BLOCK_SIZE/2;
     }
 
-    // //right
-    // Block blockRight = getBlockAt(Utils::point3f({1 + bOffset.x + (cOffset.x * CHUNK_WIDTH), bOffset.y, bOffset.z + (cOffset.y * CHUNK_WIDTH)}));
-    // if(blockRight.type == bType_air || blockRight.type == bType_null){
-    // // glTexCoord2f(1-398.0f/texture.width, 1-201.0f/texture.height);
-    // arr[24] = bOffset.x + BLOCK_SIZE/2; 
-    // arr[25] =bOffset.y + BLOCK_SIZE/2; 
-    // arr[26] =bOffset.z + BLOCK_SIZE/2;
+    //right
+    Block blockRight = getBlockAt(Utils::point3f({1 + bOffset.x + (cOffset.x * CHUNK_WIDTH), bOffset.y, bOffset.z + (cOffset.y * CHUNK_WIDTH)}));
+    if(blockRight.type == bType_air || blockRight.type == bType_null){
+    // glTexCoord2f(1-398.0f/texture.width, 1-201.0f/texture.height);
+    arr[24] = bOffset.x + BLOCK_SIZE/2; 
+    arr[25] =bOffset.y + BLOCK_SIZE/2; 
+    arr[26] =bOffset.z + BLOCK_SIZE/2;
 
-    // // glTexCoord2f(1-398.0f/texture.width, 1-398.0f/texture.height);
-    // arr[27] = bOffset.x + BLOCK_SIZE/2; 
-    // arr[28] =bOffset.y + BLOCK_SIZE/2;
-    // arr[29] =bOffset.z - BLOCK_SIZE/2;
+    // glTexCoord2f(1-398.0f/texture.width, 1-398.0f/texture.height);
+    arr[27] = bOffset.x + BLOCK_SIZE/2; 
+    arr[28] =bOffset.y + BLOCK_SIZE/2;
+    arr[29] =bOffset.z - BLOCK_SIZE/2;
 
-    // // glTexCoord2f(1-598.0f/texture.width, 1-398.0f/texture.height);
-    // arr[30] = bOffset.x + BLOCK_SIZE/2; 
-    // arr[31] =bOffset.y - BLOCK_SIZE/2; 
-    // arr[32] =bOffset.z - BLOCK_SIZE/2;
+    // glTexCoord2f(1-598.0f/texture.width, 1-398.0f/texture.height);
+    arr[30] = bOffset.x + BLOCK_SIZE/2; 
+    arr[31] =bOffset.y - BLOCK_SIZE/2; 
+    arr[32] =bOffset.z - BLOCK_SIZE/2;
     
-    // // glTexCoord2f(1-598.0f/texture.width, 1-201.0f/texture.height);
-    // arr[33] = bOffset.x + BLOCK_SIZE/2; 
-    // arr[34] =bOffset.y - BLOCK_SIZE/2; 
-    // arr[35] =bOffset.z + BLOCK_SIZE/2;
-    // }
+    // glTexCoord2f(1-598.0f/texture.width, 1-201.0f/texture.height);
+    arr[33] = bOffset.x + BLOCK_SIZE/2; 
+    arr[34] =bOffset.y - BLOCK_SIZE/2; 
+    arr[35] =bOffset.z + BLOCK_SIZE/2;
+    }
 
     //left
     Block blockLeft = getBlockAt(Utils::point3f({bOffset.x + (cOffset.x * CHUNK_WIDTH) - 1, bOffset.y, bOffset.z + (cOffset.y * CHUNK_WIDTH)}));

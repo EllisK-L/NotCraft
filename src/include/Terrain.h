@@ -4,7 +4,7 @@
 
 #define CHUNK_WIDTH 16
 #define CHUNK_HEIGHT 64
-#define MAP_SIZE 2
+#define MAP_SIZE 4
 #define RENDER_DISTANCE 4
 
 enum BlockType{
@@ -37,15 +37,17 @@ public:
 private:
     struct Chunk{
         Block blocks[CHUNK_WIDTH][CHUNK_HEIGHT][CHUNK_WIDTH]; //it's like this because [x][y][z]
-        GLuint VBA;
+        GLuint VAO;
+        GLuint VBO;
+        int VAO_Size;
     };
 
     void renderBlock(Block block, Utils::point3f point);
     void renderChunk(Chunk& chunk, Utils::point2f offset);
     void initChunk(Chunk* chunk);
     bool shouldChunkBeLoaded(Utils::point2f offset);
-    void generateVBO(Chunk& chunk, Utils::point2f offset);
-    float* getBlockVerts(const Block& block, Utils::point3f bOffset,Utils::point2f cOffset);
+    void generateVBO(Chunk* chunk, Utils::point2f offset);
+    float* getBlockVerts(const Block& block, Utils::point3f bOffset,Utils::point2f cOffset, float* arr);
 
     Chunk chunks[MAP_SIZE][MAP_SIZE];
     Utils::image& texture;

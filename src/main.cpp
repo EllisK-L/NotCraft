@@ -110,6 +110,7 @@ void displayDraw(void){
 	gluSphere(qobj, .1, 30, 30);
 	glPopMatrix();
 
+
 	terrain->render();
 
 	//glFlush();
